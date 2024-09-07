@@ -1,5 +1,4 @@
 import React from "react";
-import Droppable from "./Droppable";
 import TodoCard, { TodoItem } from "./TodoCard";
 import {
   horizontalListSortingStrategy,

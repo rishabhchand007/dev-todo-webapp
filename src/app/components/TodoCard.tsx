@@ -1,5 +1,4 @@
 import React from "react";
-import Draggable from "./Draggable";
 import { Card } from "@/components/ui/card";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -28,11 +27,12 @@ const TodoCard = ({ id, title, description }: TodoItem) => {
     <Card
       className="px-[16px] py-[20px]"
       ref={setNodeRef}
+      {...attributes}
       style={{
         transition,
         transform: CSS.Translate.toString(transform),
+        opacity: isDragging ? 0.5 : undefined,
       }}
-      {...attributes}
       {...listeners}
     >
       <div className="text-[16px] font-[700]">{title}</div>
