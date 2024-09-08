@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 
-// These styles apply to every route in the application
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 

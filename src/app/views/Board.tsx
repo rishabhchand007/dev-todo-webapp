@@ -22,6 +22,7 @@ import {
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import TodoCard from "../components/TodoCard";
+import { TouchSensor, MouseSensor } from "../utilities/dndSensors";
 const arr = [
   {
     id: "container-1",
@@ -29,25 +30,24 @@ const arr = [
     itemList: [
       {
         id: "item-1",
-        title: "Lorem",
-        description: "",
+        title: "Copywriting of the app",
+        description:
+          "Composing words to provide people with decision-making clarity when interacting with a product.",
+        branchName: "copy-write-app",
       },
       {
         id: "item2",
-        title: "Ipsum",
-        description: "asdasd",
+        title: "Add new dropdown in the froms",
+        description: "add, delete, remove and update options",
+        branchName: "feat-dropdown",
       },
       {
         id: "item3",
-        title: "Ipsum",
-        description: "",
-      },
-      {
-        id: "item4",
-        title: "asdasdasd",
+        title: "Remove Admin Panel Colors",
         description: "",
       },
     ],
+    itemCount: 3,
   },
   {
     id: "container-2",
@@ -55,8 +55,8 @@ const arr = [
     itemList: [
       {
         id: "item5",
-        title: "Ipsum",
-        description: "",
+        title: "Github Integration",
+        description: "processing in the backend",
       },
       {
         id: "item6",
@@ -64,8 +64,9 @@ const arr = [
         description: "",
       },
     ],
+    itemCount: 3,
   },
-  { id: "container-3", title: "COMPLETED", itemList: [] },
+  { id: "container-3", title: "COMPLETED", itemList: [], itemCount: 0 },
 ];
 
 const dropAnimation: DropAnimation = {
@@ -121,7 +122,8 @@ const Board = () => {
 
   // Dnd Handlers
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(MouseSensor),
+    useSensor(TouchSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -130,7 +132,6 @@ const Board = () => {
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
     const { id } = active;
-    console.log("LOLO,", id);
     setActiveId(id);
   };
   const handleDragMove = (event: DragMoveEvent) => {

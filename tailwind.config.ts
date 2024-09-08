@@ -12,9 +12,10 @@ const config: Config = {
     extend: {
       colors: {
         black: "#09090B",
-        textWhite: "#EFEFEF",
-        textGrey: "#9999A2",
-        borderGrey: "#27272a",
+        textWhite: "#FFF",
+        textGrey: "#B8B8B8",
+        borderGrey: "#292929",
+        todoCardBackground: "#1D1F21",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
