@@ -3,15 +3,9 @@ import { Card } from "@/components/ui/card";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { CopyIcon, DeleteIcon, EditIcon, GitBranchIcon } from "../icons";
+import { Task } from "@/common/types";
 
-export interface TodoItem {
-  id: string;
-  title: string;
-  description?: string;
-  branchName?: string;
-}
-
-const TodoCard = ({ id, title, description, branchName }: TodoItem) => {
+const TaskCard = ({ id, title, description, branchName }: Task) => {
   const {
     attributes,
     listeners,
@@ -76,4 +70,4 @@ const TodoCard = ({ id, title, description, branchName }: TodoItem) => {
   );
 };
 
-export default TodoCard;
+export default TaskCard;

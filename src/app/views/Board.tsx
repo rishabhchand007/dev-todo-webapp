@@ -21,8 +21,10 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
-import TodoCard from "../components/TodoCard";
+import TodoCard from "../components/TaskCard";
 import { TouchSensor, MouseSensor } from "../utilities/dndSensors";
+import { BoardState } from "@/common/types";
+import TaskCard from "../components/TaskCard";
 const arr = [
   {
     id: "container-1",
@@ -69,6 +71,65 @@ const arr = [
   { id: "container-3", title: "COMPLETED", itemList: [], itemCount: 0 },
 ];
 
+const boardState: BoardState = {
+  columns: {
+    column1: {
+      id: "column1",
+      title: "TODO",
+      taskIds: ["task1", "task2"],
+      order: 1,
+      itemCount: 2,
+    },
+    column2: {
+      id: "column2",
+      title: "IN WORK",
+      taskIds: ["task3", "task4"],
+      order: 2,
+      itemCount: 2,
+    },
+    column3: {
+      id: "column3",
+      title: "COMPLETED",
+      taskIds: [],
+      order: 3,
+      itemCount: 0,
+    },
+  },
+  tasks: {
+    task1: {
+      id: "task1",
+      columnId: "column1",
+      title: "Copywriting of the app",
+      description:
+        "Composing words to provide people with decision-making clarity.",
+      branchName: "copy-write-app",
+      order: 1,
+    },
+    task2: {
+      id: "task2",
+      columnId: "column1",
+      title: "Add new dropdown in the forms",
+      description: "Add, delete, remove and update options.",
+      branchName: "feat-dropdown",
+      order: 2,
+    },
+    task3: {
+      id: "task3",
+      columnId: "column2",
+      title: "Github Integration",
+      description: "Processing in the backend",
+      order: 1,
+    },
+    task4: {
+      id: "task4",
+      columnId: "column2",
+      title: "Remove Admin Panel Colors",
+      description: "",
+      order: 2,
+    },
+  },
+};
+
 const dropAnimation: DropAnimation = {
   sideEffects: defaultDropAnimationSideEffects({
     styles: {
@@ -79,33 +140,27 @@ const dropAnimation: DropAnimation = {
   }),
 };
 const Board = () => {
-  const [containers, setContainers] = useState<Column[]>(arr);
+  const [columns, setColumns] = useState<Column[]>(arr);
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
-  const [currentContainerId, setCurrentContainerId] =
-    useState<UniqueIdentifier>();
-  const [containerName, setContainerName] = useState("");
-  const [itemName, setItemName] = useState("");
-  const [showAddContainerModal, setShowAddContainerModal] = useState(false);
-  const [showAddItemModal, setShowAddItemModal] = useState(false);
 
   // Find the value of the items
   function findValueOfItems(id: UniqueIdentifier | undefined, type: string) {
     if (type === "container") {
-      return containers.find((item) => item.id === id);
+      return columns.find((item) => item.id === id);
     }
     if (type === "item") {
-      return containers.find((container) =>
+      return columns.find((container) =>
         container?.itemList?.find((item) => item.id === id)
       );
     }
   }
 
-  const findItemTitle = (id: UniqueIdentifier | undefined) => {
+  const findItem = (id: UniqueIdentifier | undefined) => {
     const container = findValueOfItems(id, "item");
-    if (!container) return "";
+    if (!container) return undefined;
     const item = container?.itemList?.find((item) => item.id === id);
-    if (!item) return "";
-    return item.title;
+    if (!item) return undefined;
+    return item;
   };
 
   const findContainer = (id: UniqueIdentifier | undefined) => {
@@ -153,10 +208,10 @@ const Board = () => {
       if (!activeContainer || !overContainer) return;
 
       // Find the index of the active and over container
-      const activeContainerIndex = containers.findIndex(
+      const activeContainerIndex = columns.findIndex(
         (container) => container.id === activeContainer.id
       );
-      const overContainerIndex = containers.findIndex(
+      const overContainerIndex = columns.findIndex(
         (container) => container.id === overContainer.id
       );
 
@@ -169,17 +224,17 @@ const Board = () => {
       );
       // In the same container
       if (activeContainerIndex === overContainerIndex) {
-        let newItems = [...containers];
+        let newItems = [...columns];
         newItems[activeContainerIndex].itemList = arrayMove(
           newItems[activeContainerIndex].itemList,
           activeitemIndex,
           overitemIndex
         );
 
-        setContainers(newItems);
+        setColumns(newItems);
       } else {
-        // In different containers
-        let newItems = [...containers];
+        // In different columns
+        let newItems = [...columns];
         const [removeditem] = newItems?.[
           activeContainerIndex
         ]?.itemList?.splice(activeitemIndex, 1);
@@ -188,7 +243,7 @@ const Board = () => {
           0,
           removeditem
         );
-        setContainers(newItems);
+        setColumns(newItems);
       }
     }
 
@@ -208,10 +263,10 @@ const Board = () => {
       if (!activeContainer || !overContainer) return;
 
       // Find the index of the active and over container
-      const activeContainerIndex = containers.findIndex(
+      const activeContainerIndex = columns.findIndex(
         (container) => container.id === activeContainer.id
       );
-      const overContainerIndex = containers.findIndex(
+      const overContainerIndex = columns.findIndex(
         (container) => container.id === overContainer.id
       );
 
@@ -221,13 +276,13 @@ const Board = () => {
       );
 
       // Remove the active item from the active container and add it to the over container
-      let newItems = [...containers];
+      let newItems = [...columns];
       const [removeditem] = newItems[activeContainerIndex].itemList?.splice(
         activeitemIndex,
         1
       );
       newItems[overContainerIndex].itemList?.push(removeditem);
-      setContainers(newItems);
+      setColumns(newItems);
     }
   };
   const handleDragEnd = (event: DragEndEvent) => {
@@ -242,16 +297,16 @@ const Board = () => {
       active.id !== over.id
     ) {
       // Find the index of the active and over container
-      const activeContainerIndex = containers.findIndex(
+      const activeContainerIndex = columns.findIndex(
         (container) => container.id === active.id
       );
-      const overContainerIndex = containers.findIndex(
+      const overContainerIndex = columns.findIndex(
         (container) => container.id === over.id
       );
       // Swap the active and over container
-      let newItems = [...containers];
+      let newItems = [...columns];
       newItems = arrayMove(newItems, activeContainerIndex, overContainerIndex);
-      setContainers(newItems);
+      setColumns(newItems);
     }
 
     // Handling item Sorting
@@ -269,10 +324,10 @@ const Board = () => {
       // If the active or over container is not found, return
       if (!activeContainer || !overContainer) return;
       // Find the index of the active and over container
-      const activeContainerIndex = containers.findIndex(
+      const activeContainerIndex = columns.findIndex(
         (container) => container.id === activeContainer.id
       );
-      const overContainerIndex = containers.findIndex(
+      const overContainerIndex = columns.findIndex(
         (container) => container.id === overContainer.id
       );
       // Find the index of the active and over item
@@ -285,16 +340,16 @@ const Board = () => {
 
       // In the same container
       if (activeContainerIndex === overContainerIndex) {
-        let newItems = [...containers];
+        let newItems = [...columns];
         newItems[activeContainerIndex].itemList = arrayMove(
           newItems?.[activeContainerIndex]?.itemList,
           activeitemIndex,
           overitemIndex
         );
-        setContainers(newItems);
+        setColumns(newItems);
       } else {
-        // In different containers
-        let newItems = [...containers];
+        // In different columns
+        let newItems = [...columns];
         const [removeditem] = newItems[activeContainerIndex].itemList.splice(
           activeitemIndex,
           1
@@ -304,7 +359,7 @@ const Board = () => {
           0,
           removeditem
         );
-        setContainers(newItems);
+        setColumns(newItems);
       }
     }
     // Handling item dropping into Container
@@ -322,10 +377,10 @@ const Board = () => {
       // If the active or over container is not found, return
       if (!activeContainer || !overContainer) return;
       // Find the index of the active and over container
-      const activeContainerIndex = containers.findIndex(
+      const activeContainerIndex = columns.findIndex(
         (container) => container.id === activeContainer.id
       );
-      const overContainerIndex = containers.findIndex(
+      const overContainerIndex = columns.findIndex(
         (container) => container.id === overContainer.id
       );
       // Find the index of the active and over item
@@ -333,13 +388,13 @@ const Board = () => {
         (item) => item.id === active.id
       );
 
-      let newItems = [...containers];
+      let newItems = [...columns];
       const [removeditem] = newItems[activeContainerIndex].itemList.splice(
         activeitemIndex,
         1
       );
       newItems[overContainerIndex].itemList.push(removeditem);
-      setContainers(newItems);
+      setColumns(newItems);
     }
     setActiveId(null);
   };
@@ -353,20 +408,29 @@ const Board = () => {
         onDragStart={handleDragStart}
         onDragMove={handleDragMove}
       >
-        <SortableContext items={containers.map((i) => i.id)}>
-          {containers?.map((column) => (
-            <BoardColumn key={column.id} column={column} />
+        <SortableContext items={Object.keys(boardState?.columns)}>
+          {Object.values(boardState?.columns)?.map((column) => (
+            <BoardColumn
+              key={column.id}
+              column={column}
+              tasks={boardState?.tasks}
+            />
           ))}
         </SortableContext>
 
-        <DragOverlay adjustScale={false} dropAnimation={dropAnimation}>
+        {/* <DragOverlay adjustScale={false} dropAnimation={dropAnimation}>
           {activeId && activeId.toString().includes("item") && (
-            <TodoCard id={activeId} title={findItemTitle(activeId)} />
+            <TaskCard
+              id={activeId}
+              title={findItem(activeId).title}
+              description={findItem(activeId)?.description}
+              branchName={findItem(activeId)?.branchName}
+            />
           )}
           {activeId && activeId.toString().includes("container") && (
             <BoardColumn column={findContainer(activeId)} />
           )}
-        </DragOverlay>
+        </DragOverlay> */}
       </DndContext>
     </div>
   );

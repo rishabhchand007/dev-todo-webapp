@@ -1,26 +1,16 @@
 import React from "react";
-import TodoCard, { TodoItem } from "./TodoCard";
-import {
-  horizontalListSortingStrategy,
-  SortableContext,
-  useSortable,
-} from "@dnd-kit/sortable";
-import { UniqueIdentifier } from "@dnd-kit/core";
+import { SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { AddIcon } from "../icons";
-
-export interface Column {
-  title: string;
-  id: string;
-  itemList?: TodoItem[];
-  itemCount: number;
-}
+import { Column, Task } from "@/common/types";
+import TaskCard from "./TaskCard";
 
 interface BoardColumnProps {
   column: Column;
+  tasks: Record<string, Task>;
 }
 
-const BoardColumn = ({ column }: BoardColumnProps) => {
+const BoardColumn = ({ column, tasks }: BoardColumnProps) => {
   const {
     attributes,
     setNodeRef,
@@ -59,14 +49,14 @@ const BoardColumn = ({ column }: BoardColumnProps) => {
       </div>
 
       <div className="flex  flex-col gap-y-4">
-        <SortableContext items={column?.itemList?.map((item) => item.id) ?? []}>
-          {column?.itemList?.map((item) => (
-            <TodoCard
-              key={item.id}
-              id={item.id}
-              title={item.title}
-              description={item.description}
-              branchName={item.branchName}
+        <SortableContext items={Object.keys(column)}>
+          {column?.taskIds?.map((item) => (
+            <TaskCard
+              key={tasks[item].id}
+              id={tasks[item].id}
+              title={tasks[item].title}
+              description={tasks[item].description}
+              branchName={tasks[item].branchName}
             />
           ))}
         </SortableContext>
