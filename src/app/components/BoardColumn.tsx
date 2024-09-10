@@ -11,6 +11,7 @@ interface BoardColumnProps {
 }
 
 const BoardColumn = ({ column, tasks }: BoardColumnProps) => {
+  console.log(column, "column clg");
   const {
     attributes,
     setNodeRef,
@@ -21,7 +22,7 @@ const BoardColumn = ({ column, tasks }: BoardColumnProps) => {
   } = useSortable({
     id: column.id,
     data: {
-      type: "container",
+      type: "Column",
     },
   });
 
@@ -57,6 +58,7 @@ const BoardColumn = ({ column, tasks }: BoardColumnProps) => {
               title={tasks[item].title}
               description={tasks[item].description}
               branchName={tasks[item].branchName}
+              columnId={tasks[item].columnId}
             />
           ))}
         </SortableContext>

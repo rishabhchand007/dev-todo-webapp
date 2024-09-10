@@ -5,7 +5,16 @@ import { CSS } from "@dnd-kit/utilities";
 import { CopyIcon, DeleteIcon, EditIcon, GitBranchIcon } from "../icons";
 import { Task } from "@/common/types";
 
-const TaskCard = ({ id, title, description, branchName }: Task) => {
+interface TaskCardProps {
+  id: string;
+  columnId?: string;
+  title: string;
+  description: string;
+  branchName?: string;
+  order?: number;
+}
+
+const TaskCard = ({ id, title, description, branchName }: TaskCardProps) => {
   const {
     attributes,
     listeners,
@@ -16,7 +25,7 @@ const TaskCard = ({ id, title, description, branchName }: Task) => {
   } = useSortable({
     id: id,
     data: {
-      type: "item",
+      type: "Task",
     },
   });
   return (
