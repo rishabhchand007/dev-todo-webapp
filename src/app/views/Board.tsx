@@ -15,7 +15,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import BoardColumn, { Column } from "../components/BoardColumn";
 import {
   arrayMove,
@@ -26,6 +26,7 @@ import TodoCard from "../components/TaskCard";
 import { TouchSensor, MouseSensor } from "../utilities/dndSensors";
 import { BoardState } from "@/common/types";
 import TaskCard from "../components/TaskCard";
+import { createPortal } from "react-dom";
 const arr = [
   {
     id: "container-1",
@@ -141,41 +142,13 @@ const dropAnimation: DropAnimation = {
   }),
 };
 const Board = () => {
-  const [columns, setColumns] = useState<Column[]>(arr);
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const [boardState, setBoardState] = useState<BoardState>(initialDataLoad);
 
-  // Find the value of the items
-  function findValueOfItems(id: UniqueIdentifier | undefined, type: string) {
-    if (type === "container") {
-      return columns.find((item) => item.id === id);
-    }
-    if (type === "item") {
-      return columns.find((container) =>
-        container?.itemList?.find((item) => item.id === id)
-      );
-    }
-  }
-
-  const findItem = (id: UniqueIdentifier | undefined) => {
-    const container = findValueOfItems(id, "item");
-    if (!container) return undefined;
-    const item = container?.itemList?.find((item) => item.id === id);
-    if (!item) return undefined;
-    return item;
-  };
-
-  const findContainer = (id: UniqueIdentifier | undefined) => {
-    const container = findValueOfItems(id, "container");
-    if (!container) return undefined;
-    return container;
-  };
-
-  const findContainerItems = (id: UniqueIdentifier | undefined) => {
-    const container = findValueOfItems(id, "container");
-    if (!container) return [];
-    return container?.itemList;
-  };
+  const columnsIds = useMemo(
+    () => Object.keys(boardState?.columns),
+    [boardState?.columns]
+  );
 
   // Dnd Handlers
   const sensors = useSensors(
@@ -186,232 +159,16 @@ const Board = () => {
     })
   );
 
-  const handleDragStart = (event: DragStartEvent) => {
-    const { active } = event;
-    const { id } = active;
-    console.log("ID_SISP", id);
-    setActiveId(id);
-  };
-  const handleDragMove = (event: DragMoveEvent) => {
-    const { active, over } = event;
-    // Handle Items Sorting
-    if (
-      active.id.toString().includes("item") &&
-      over?.id.toString().includes("item") &&
-      active &&
-      over &&
-      active.id !== over.id
-    ) {
-      // Find the active container and over container
-      const activeContainer = findValueOfItems(active.id, "item");
-      const overContainer = findValueOfItems(over.id, "item");
-
-      // If the active or over container is not found, return
-      if (!activeContainer || !overContainer) return;
-
-      // Find the index of the active and over container
-      const activeContainerIndex = columns.findIndex(
-        (container) => container.id === activeContainer.id
-      );
-      const overContainerIndex = columns.findIndex(
-        (container) => container.id === overContainer.id
-      );
-
-      // Find the index of the active and over item
-      const activeitemIndex = activeContainer?.itemList?.findIndex(
-        (item) => item.id === active.id
-      );
-      const overitemIndex = overContainer?.itemList?.findIndex(
-        (item) => item.id === over.id
-      );
-      // In the same container
-      if (activeContainerIndex === overContainerIndex) {
-        let newItems = [...columns];
-        newItems[activeContainerIndex].itemList = arrayMove(
-          newItems[activeContainerIndex].itemList,
-          activeitemIndex,
-          overitemIndex
-        );
-
-        setColumns(newItems);
-      } else {
-        // In different columns
-        let newItems = [...columns];
-        const [removeditem] = newItems?.[
-          activeContainerIndex
-        ]?.itemList?.splice(activeitemIndex, 1);
-        newItems?.[overContainerIndex].itemList?.splice(
-          overitemIndex,
-          0,
-          removeditem
-        );
-        setColumns(newItems);
-      }
-    }
-
-    // Handling Item Drop Into a Container
-    if (
-      active.id.toString().includes("item") &&
-      over?.id.toString().includes("container") &&
-      active &&
-      over &&
-      active.id !== over.id
-    ) {
-      // Find the active and over container
-      const activeContainer = findValueOfItems(active.id, "item");
-      const overContainer = findValueOfItems(over.id, "container");
-
-      // If the active or over container is not found, return
-      if (!activeContainer || !overContainer) return;
-
-      // Find the index of the active and over container
-      const activeContainerIndex = columns.findIndex(
-        (container) => container.id === activeContainer.id
-      );
-      const overContainerIndex = columns.findIndex(
-        (container) => container.id === overContainer.id
-      );
-
-      // Find the index of the active and over item
-      const activeitemIndex = activeContainer.itemList?.findIndex(
-        (item) => item.id === active.id
-      );
-
-      // Remove the active item from the active container and add it to the over container
-      let newItems = [...columns];
-      const [removeditem] = newItems[activeContainerIndex].itemList?.splice(
-        activeitemIndex,
-        1
-      );
-      newItems[overContainerIndex].itemList?.push(removeditem);
-      setColumns(newItems);
-    }
-  };
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    // Handling Container Sorting
-    if (
-      active.id.toString().includes("container") &&
-      over?.id.toString().includes("container") &&
-      active &&
-      over &&
-      active.id !== over.id
-    ) {
-      // Find the index of the active and over container
-      const activeContainerIndex = columns.findIndex(
-        (container) => container.id === active.id
-      );
-      const overContainerIndex = columns.findIndex(
-        (container) => container.id === over.id
-      );
-      // Swap the active and over container
-      let newItems = [...columns];
-      newItems = arrayMove(newItems, activeContainerIndex, overContainerIndex);
-      setColumns(newItems);
-    }
-
-    // Handling item Sorting
-    if (
-      active.id.toString().includes("item") &&
-      over?.id.toString().includes("item") &&
-      active &&
-      over &&
-      active.id !== over.id
-    ) {
-      // Find the active and over container
-      const activeContainer = findValueOfItems(active.id, "item");
-      const overContainer = findValueOfItems(over.id, "item");
-
-      // If the active or over container is not found, return
-      if (!activeContainer || !overContainer) return;
-      // Find the index of the active and over container
-      const activeContainerIndex = columns.findIndex(
-        (container) => container.id === activeContainer.id
-      );
-      const overContainerIndex = columns.findIndex(
-        (container) => container.id === overContainer.id
-      );
-      // Find the index of the active and over item
-      const activeitemIndex = activeContainer?.itemList?.findIndex(
-        (item) => item.id === active.id
-      );
-      const overitemIndex = overContainer?.itemList?.findIndex(
-        (item) => item.id === over.id
-      );
-
-      // In the same container
-      if (activeContainerIndex === overContainerIndex) {
-        let newItems = [...columns];
-        newItems[activeContainerIndex].itemList = arrayMove(
-          newItems?.[activeContainerIndex]?.itemList,
-          activeitemIndex,
-          overitemIndex
-        );
-        setColumns(newItems);
-      } else {
-        // In different columns
-        let newItems = [...columns];
-        const [removeditem] = newItems[activeContainerIndex].itemList.splice(
-          activeitemIndex,
-          1
-        );
-        newItems[overContainerIndex].itemList.splice(
-          overitemIndex,
-          0,
-          removeditem
-        );
-        setColumns(newItems);
-      }
-    }
-    // Handling item dropping into Container
-    if (
-      active.id.toString().includes("item") &&
-      over?.id.toString().includes("container") &&
-      active &&
-      over &&
-      active.id !== over.id
-    ) {
-      // Find the active and over container
-      const activeContainer = findValueOfItems(active.id, "item");
-      const overContainer = findValueOfItems(over.id, "container");
-
-      // If the active or over container is not found, return
-      if (!activeContainer || !overContainer) return;
-      // Find the index of the active and over container
-      const activeContainerIndex = columns.findIndex(
-        (container) => container.id === activeContainer.id
-      );
-      const overContainerIndex = columns.findIndex(
-        (container) => container.id === overContainer.id
-      );
-      // Find the index of the active and over item
-      const activeitemIndex = activeContainer.itemList.findIndex(
-        (item) => item.id === active.id
-      );
-
-      let newItems = [...columns];
-      const [removeditem] = newItems[activeContainerIndex].itemList.splice(
-        activeitemIndex,
-        1
-      );
-      newItems[overContainerIndex].itemList.push(removeditem);
-      setColumns(newItems);
-    }
-    setActiveId(null);
-  };
-
   return (
     <div className="px-12 py-7 flex gap-[30px]">
       <DndContext
-        onDragEnd={handleDragEnd}
+        // onDragEnd={handleDragEnd}
         sensors={sensors}
         collisionDetection={closestCorners}
         onDragStart={handleDragStart}
-        // onDragMove={handleDragMove}
         onDragOver={handleDragOver}
       >
-        <SortableContext items={Object.keys(boardState?.columns)}>
+        <SortableContext items={columnsIds}>
           {Object.values(boardState?.columns)?.map((column) => (
             <BoardColumn
               key={column.id}
@@ -421,34 +178,43 @@ const Board = () => {
           ))}
         </SortableContext>
 
-        <DragOverlay adjustScale={false} dropAnimation={dropAnimation}>
-          {activeId && activeId.toString().includes("task") && (
-            <TaskCard
-              id={activeId.toString()}
-              title={boardState.tasks[activeId].title}
-              description={boardState.tasks[activeId].description}
-              branchName={boardState.tasks[activeId].branchName}
-            />
+        {"document" in window &&
+          createPortal(
+            <DragOverlay adjustScale={false} dropAnimation={dropAnimation}>
+              {activeId && activeId.toString().includes("task") && (
+                <TaskCard
+                  id={activeId.toString()}
+                  title={boardState.tasks[activeId].title}
+                  description={boardState.tasks[activeId].description}
+                  branchName={boardState.tasks[activeId].branchName}
+                />
+              )}
+              {activeId && activeId.toString().includes("column") && (
+                <BoardColumn
+                  column={boardState.columns[activeId]}
+                  tasks={boardState?.tasks}
+                />
+              )}
+            </DragOverlay>,
+            document.body
           )}
-          {activeId && activeId.toString().includes("column") && (
-            <BoardColumn
-              column={boardState.columns[activeId]}
-              tasks={boardState?.tasks}
-            />
-          )}
-        </DragOverlay>
       </DndContext>
     </div>
   );
 
+  function handleDragStart(event: DragStartEvent) {
+    const { active } = event;
+    const { id } = active;
+    setActiveId(id);
+  }
+
   function handleDragOver(event: DragOverEvent) {
     const { active, over } = event;
-    console.log({ active, over }, "active, over");
+
     if (!over) return;
 
     const activeId = active.id;
     const overId = over.id;
-
     if (activeId === overId) return;
 
     const activeData = active.data.current;
@@ -458,73 +224,63 @@ const Board = () => {
     const isOverATask = overData?.type === "Task";
 
     if (!isActiveATask) return;
-    if (isActiveATask && isOverATask) {
-      // Update the board state
-      setBoardState((board: BoardState) => {
-        const newBoard = { ...board };
-        const { tasks, columns } = newBoard;
-        const activeTask = tasks[activeId];
-        const overTask = tasks[overId];
-        const activeColumn = columns[activeTask.columnId];
-        const overColumn = columns[overTask.columnId];
+    setTimeout(
+      () =>
+        setBoardState((board) => {
+          const newBoard = structuredClone(board);
+          const { tasks, columns } = newBoard;
 
-        const overTaskIndex = overColumn.taskIds.indexOf(overId);
-        const activeTaskIndex = activeColumn.taskIds.indexOf(activeId);
+          const activeTask = tasks[activeId];
+          const activeColumn = columns[activeTask.columnId];
 
-        if (
-          activeTask &&
-          overTask &&
-          activeTask.columnId !== overTask.columnId
-        ) {
-          activeColumn.taskIds = activeColumn.taskIds.filter(
-            (id) => id !== activeId
-          );
+          if (!activeTask || !activeColumn) return board; // Safety check
 
-          overColumn.taskIds.splice(overTaskIndex, 0, activeId);
+          if (isOverATask) {
+            const overTask = tasks[overId];
+            const overColumn = columns[overTask.columnId];
 
-          activeTask.columnId = overTask.columnId;
+            if (!overTask || !overColumn) return board; // Safety check
 
-          return newBoard;
-        }
-        console.log({ activeTaskIndex, overTaskIndex }, "INDEXES");
-        overColumn.taskIds = arrayMove(
-          overColumn.taskIds,
-          activeTaskIndex,
-          overTaskIndex
-        );
-        return newBoard;
-      });
-    }
+            const activeIndex = activeColumn.taskIds.indexOf(activeId);
+            const overIndex = overColumn.taskIds.indexOf(overId);
 
-    const isOverAColumn = overData?.type === "Column";
+            // Moving between different columns
+            if (activeTask.columnId !== overTask.columnId) {
+              activeColumn.taskIds = activeColumn.taskIds.filter(
+                (id) => id !== activeId
+              );
+              overColumn.taskIds.splice(overIndex, 0, activeId); // Insert at correct position
 
-    // Im dropping a Task over a column
-    if (isActiveATask && isOverAColumn) {
-      console.log("overhere ,", overId);
-      setBoardState((board: BoardState) => {
-        const newBoard = { ...board };
+              activeTask.columnId = overTask.columnId; // Update task's columnId
+            } else {
+              // Reordering within the same column
+              activeColumn.taskIds = arrayMove(
+                activeColumn.taskIds,
+                activeIndex,
+                overIndex
+              );
+            }
+          }
 
-        const { tasks, columns } = newBoard;
-        const activeTask = tasks[activeId];
-        const activeColumn = columns[activeTask.columnId];
-        const overColumn = columns[overId];
+          const isOverAColumn = overData?.type === "Column";
+          if (isOverAColumn) {
+            const overColumn = columns[overId];
 
-        const activeTaskIndex = activeColumn.taskIds.indexOf(activeId);
+            // Remove from current column
+            activeColumn.taskIds = activeColumn.taskIds.filter(
+              (id) => id !== activeId
+            );
+            // Add to new column at the end
+            overColumn.taskIds.push(activeId);
 
-        if (activeTask) {
-          activeColumn.taskIds = activeColumn.taskIds.filter(
-            (id) => id !== activeId
-          );
-
-          overColumn.taskIds.splice(activeTaskIndex, 0, activeId);
-
-          activeTask.columnId = overId;
+            // Update task's columnId
+            activeTask.columnId = overId;
+          }
 
           return newBoard;
-        }
-        return board;
-      });
-    }
+        }),
+      0
+    );
   }
 };
 

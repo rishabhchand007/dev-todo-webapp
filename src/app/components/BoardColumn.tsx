@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { AddIcon } from "../icons";
@@ -11,7 +11,6 @@ interface BoardColumnProps {
 }
 
 const BoardColumn = ({ column, tasks }: BoardColumnProps) => {
-  console.log(column, "column clg");
   const {
     attributes,
     setNodeRef,
@@ -23,8 +22,11 @@ const BoardColumn = ({ column, tasks }: BoardColumnProps) => {
     id: column.id,
     data: {
       type: "Column",
+      column,
     },
   });
+
+  const memoizedTaskIds = useMemo(() => column?.taskIds, [column?.taskIds]);
 
   return (
     <div
@@ -50,7 +52,7 @@ const BoardColumn = ({ column, tasks }: BoardColumnProps) => {
       </div>
 
       <div className="flex  flex-col gap-y-4">
-        <SortableContext items={Object.keys(column)}>
+        <SortableContext items={memoizedTaskIds}>
           {column?.taskIds?.map((item) => (
             <TaskCard
               key={tasks[item].id}
