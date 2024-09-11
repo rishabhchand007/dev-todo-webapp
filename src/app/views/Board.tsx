@@ -4,19 +4,17 @@ import {
   defaultDropAnimationSideEffects,
   DndContext,
   DragEndEvent,
-  DragMoveEvent,
   DragOverEvent,
   DragOverlay,
   DragStartEvent,
   DropAnimation,
   KeyboardSensor,
-  PointerSensor,
   UniqueIdentifier,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
 import { useMemo, useState } from "react";
-import BoardColumn, { Column } from "../components/BoardColumn";
+import BoardColumn from "../components/BoardColumn";
 import {
   arrayMove,
   SortableContext,
@@ -27,51 +25,6 @@ import { TouchSensor, MouseSensor } from "../utilities/dndSensors";
 import { BoardState } from "@/common/types";
 import TaskCard from "../components/TaskCard";
 import { createPortal } from "react-dom";
-const arr = [
-  {
-    id: "container-1",
-    title: "TODO",
-    itemList: [
-      {
-        id: "item-1",
-        title: "Copywriting of the app",
-        description:
-          "Composing words to provide people with decision-making clarity when interacting with a product.",
-        branchName: "copy-write-app",
-      },
-      {
-        id: "item2",
-        title: "Add new dropdown in the froms",
-        description: "add, delete, remove and update options",
-        branchName: "feat-dropdown",
-      },
-      {
-        id: "item3",
-        title: "Remove Admin Panel Colors",
-        description: "",
-      },
-    ],
-    itemCount: 3,
-  },
-  {
-    id: "container-2",
-    title: "IN WORK",
-    itemList: [
-      {
-        id: "item5",
-        title: "Github Integration",
-        description: "processing in the backend",
-      },
-      {
-        id: "item6",
-        title: "asdasdasd",
-        description: "",
-      },
-    ],
-    itemCount: 3,
-  },
-  { id: "container-3", title: "COMPLETED", itemList: [], itemCount: 0 },
-];
 
 const initialDataLoad: BoardState = {
   columns: {
@@ -145,12 +98,11 @@ const Board = () => {
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const [boardState, setBoardState] = useState<BoardState>(initialDataLoad);
 
-  const columnsIds = useMemo(
+  const memorizedColumnIds = useMemo(
     () => Object.keys(boardState?.columns),
     [boardState?.columns]
   );
 
-  // Dnd Handlers
   const sensors = useSensors(
     useSensor(MouseSensor),
     useSensor(TouchSensor),
@@ -168,7 +120,7 @@ const Board = () => {
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
       >
-        <SortableContext items={columnsIds}>
+        <SortableContext items={memorizedColumnIds}>
           {Object.values(boardState?.columns)?.map((column) => (
             <BoardColumn
               key={column.id}
@@ -205,6 +157,7 @@ const Board = () => {
   function handleDragStart(event: DragStartEvent) {
     const { active } = event;
     const { id } = active;
+    console.log(active, "active");
     setActiveId(id);
   }
 
@@ -241,15 +194,17 @@ const Board = () => {
 
             if (!overTask || !overColumn) return board; // Safety check
 
-            const activeIndex = activeColumn.taskIds.indexOf(activeId);
-            const overIndex = overColumn.taskIds.indexOf(overId);
+            const activeIndex = activeColumn.taskIds.indexOf(
+              activeId as string
+            );
+            const overIndex = overColumn.taskIds.indexOf(overId as string);
 
             // Moving between different columns
             if (activeTask.columnId !== overTask.columnId) {
               activeColumn.taskIds = activeColumn.taskIds.filter(
                 (id) => id !== activeId
               );
-              overColumn.taskIds.splice(overIndex, 0, activeId); // Insert at correct position
+              overColumn.taskIds.splice(overIndex, 0, activeId as string); // Insert at correct position
 
               activeTask.columnId = overTask.columnId; // Update task's columnId
             } else {
@@ -271,10 +226,10 @@ const Board = () => {
               (id) => id !== activeId
             );
             // Add to new column at the end
-            overColumn.taskIds.push(activeId);
+            overColumn.taskIds.push(activeId as string);
 
             // Update task's columnId
-            activeTask.columnId = overId;
+            activeTask.columnId = overId as string;
           }
 
           return newBoard;

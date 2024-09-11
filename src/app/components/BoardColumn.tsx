@@ -35,8 +35,9 @@ const BoardColumn = ({ column, tasks }: BoardColumnProps) => {
       style={{
         transition,
         transform: CSS.Translate.toString(transform),
+        opacity: isDragging ? 0.5 : undefined,
       }}
-      className="w-[260px]"
+      className="w-[282px] backdrop-blur-sm p-3 rounded-lg bg-white/[.01] min-h-56 max-h-[calc(100dvh-9rem)] h-full  "
       {...listeners}
     >
       <div className="flex border-b-2 border-[#1E293B] pb-3 px-3 mb-6 justify-between items-center">
