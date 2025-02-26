@@ -8,9 +8,10 @@ import TaskCard from "./TaskCard";
 interface BoardColumnProps {
   column: Column;
   tasks: Record<string, Task>;
+  openAddTaskModel?: (columnId: string) => void;
 }
 
-const BoardColumn = ({ column, tasks }: BoardColumnProps) => {
+const BoardColumn = ({ column, tasks, openAddTaskModel }: BoardColumnProps) => {
   const {
     attributes,
     setNodeRef,
@@ -22,7 +23,6 @@ const BoardColumn = ({ column, tasks }: BoardColumnProps) => {
     id: column.id,
     data: {
       type: "Column",
-      column,
     },
   });
 
@@ -37,7 +37,7 @@ const BoardColumn = ({ column, tasks }: BoardColumnProps) => {
         transform: CSS.Translate.toString(transform),
         opacity: isDragging ? 0.5 : undefined,
       }}
-      className="w-[282px] backdrop-blur-sm p-3 rounded-lg bg-white/[.01] min-h-56 max-h-[calc(100dvh-9rem)] h-full  "
+      className="w-[282px] backdrop-blur-sm p-3 rounded-lg bg-white/[.01] min-h-56 h-[calc(100dvh-9rem)]  "
       {...listeners}
     >
       <div className="flex border-b-2 border-[#1E293B] pb-3 px-3 mb-6 justify-between items-center">
@@ -47,7 +47,10 @@ const BoardColumn = ({ column, tasks }: BoardColumnProps) => {
             {column.itemCount}
           </div>
         </div>
-        <div>
+        <div
+          data-no-dnd
+          onClick={() => openAddTaskModel && openAddTaskModel(column.id)}
+        >
           <AddIcon />
         </div>
       </div>

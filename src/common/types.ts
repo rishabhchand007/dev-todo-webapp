@@ -2,7 +2,6 @@ export interface Column {
   id: string;
   title: string;
   taskIds: string[];
-  order: number;
   itemCount: number;
 }
 
@@ -12,9 +11,13 @@ export interface Task {
   title: string;
   description: string;
   branchName?: string;
-  order: number;
 }
 
+export interface TaskState {
+  title: string;
+  description: string;
+  branchName?: string;
+}
 export interface BoardState {
   columns: Record<string, Column>;
   tasks: Record<string, Task>;

@@ -16,7 +16,7 @@ const config: Config = {
         textGrey: "#B8B8B8",
         borderGrey: "#292929",
         todoCardBackground: "#1D1F21",
-        background: "hsl(var(--background))",
+        background: "black",
         foreground: "hsl(var(--foreground))",
         card: {
           DEFAULT: "hsl(var(--card))",
