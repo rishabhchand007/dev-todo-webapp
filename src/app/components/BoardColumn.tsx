@@ -4,6 +4,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { AddIcon } from "../icons";
 import { Column, Task } from "@/common/types";
 import TaskCard from "./TaskCard";
+import SortableTask from "./SortableTask";
 
 interface BoardColumnProps {
   column: Column;
@@ -58,7 +59,7 @@ const BoardColumn = ({ column, tasks, openAddTaskModel }: BoardColumnProps) => {
       <div className="flex  flex-col gap-y-4">
         <SortableContext items={memoizedTaskIds}>
           {column?.taskIds?.map((item) => (
-            <TaskCard
+            <SortableTask
               key={tasks[item].id}
               id={tasks[item].id}
               title={tasks[item].title}

@@ -1,12 +1,13 @@
 "use client";
 import {
+  closestCorners,
   DndContext,
   DragOverlay,
   KeyboardSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import BoardColumn from "../components/BoardColumn";
 import {
   SortableContext,
@@ -17,17 +18,24 @@ import {
   MouseSensor,
   dropAnimation,
 } from "../utilities/dndSensors";
-import { BoardState } from "@/common/types";
 import TaskCard from "../components/TaskCard";
 import { createPortal } from "react-dom";
-import AddTaskModal from "../components/AddTaskModal";
-import { addNewTask } from "../services/taskService";
 import { useBoardStore } from "../store/useBoardStore";
+import AddEditTaskModal from "../components/AddEditTaskModal";
 
 const Board = () => {
-  const { board, activeId, handleDragStart, handleDragOver, handleDragEnd } =
-    useBoardStore();
-  const [openAddModal, setOpenAddModal] = useState<string | boolean>(false);
+  const {
+    addNewTask,
+    board,
+    activeId,
+    handleDragStart,
+    handleDragOver,
+    handleDragEnd,
+    openAddModal,
+    setOpenAddModal,
+    taskEditData,
+    setTaskEditData,
+  } = useBoardStore();
 
   const memorizedColumnIds = useMemo(
     () => Object.keys(board.columns),
@@ -69,6 +77,7 @@ const Board = () => {
                 {activeId && activeId.toString().includes("task") && (
                   <TaskCard
                     id={activeId.toString()}
+                    columnId={board.tasks[activeId].columnId}
                     title={board.tasks[activeId].title}
                     description={board.tasks[activeId].description}
                     branchName={board.tasks[activeId].branchName}
@@ -85,11 +94,16 @@ const Board = () => {
             )}
         </DndContext>
       </div>
-      <AddTaskModal
-        open={openAddModal}
-        onClose={() => setOpenAddModal(false)}
-        handleAddTask={addNewTask}
-      />
+      {openAddModal && (
+        <AddEditTaskModal
+          open={openAddModal}
+          onClose={() => {
+            setOpenAddModal(false);
+            setTaskEditData(undefined);
+          }}
+          taskEditData={taskEditData}
+        />
+      )}
     </>
   );
 };

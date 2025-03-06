@@ -1,4 +1,4 @@
-import { BoardState, Task } from "@/common/types";
+import { BoardState, Task, TaskState } from "@/common/types";
 import {
   DragEndEvent,
   DragOverEvent,
@@ -7,6 +7,7 @@ import {
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import { create } from "zustand";
+import { uuidv4 } from "../utilities";
 
 const initialDataLoad: BoardState = {
   columns: {
@@ -82,18 +83,30 @@ const initialDataLoad: BoardState = {
 };
 
 interface BoardStore {
+  openAddModal: boolean | string;
   board: BoardState;
   activeId: UniqueIdentifier | null;
+  taskEditData: undefined | Task;
+  setOpenAddModal: (columnID: boolean | string) => void;
   handleDragStart: (event: DragStartEvent) => void;
   handleDragOver: (event: DragOverEvent) => void;
   handleDragEnd: (event: DragEndEvent) => void;
-  // moveTask: (taskId: string, toColumnId: string) => void;
-  // removeTask: (taskId: string) => void;
+  setTaskEditData: (taskEditData: Task | undefined) => void;
+  addNewTask: (columnId: string, addDetails: TaskState) => void;
+  editTask: (columnId: string, taskId: string, editDetails: TaskState) => void;
 }
 
 export const useBoardStore = create<BoardStore>((set) => ({
+  openAddModal: false,
   board: initialDataLoad,
   activeId: null,
+  taskEditData: undefined,
+  setTaskEditData: (taskEditData) => {
+    set({ taskEditData });
+  },
+  setOpenAddModal: (columnID) => {
+    set({ openAddModal: columnID });
+  },
   handleDragStart: (event) => {
     const { active } = event;
     set({ activeId: active.id });
@@ -212,6 +225,32 @@ export const useBoardStore = create<BoardStore>((set) => ({
         return { ...state, board: newBoard };
       }
       return state;
+    });
+  },
+  addNewTask: (columnId, addDetails) => {
+    const newTaskId = "task-" + uuidv4();
+    const newTask: Task = {
+      id: newTaskId,
+      columnId,
+      title: addDetails.title,
+      description: addDetails.description,
+      branchName: addDetails.branchName,
+    };
+    set((state) => {
+      const newBoard = structuredClone(state.board);
+      newBoard.tasks[newTaskId] = newTask;
+      const newTaskIds = [...newBoard?.columns[columnId]?.taskIds];
+      newTaskIds.unshift(newTaskId);
+      newBoard.columns[columnId].taskIds = newTaskIds;
+      return { ...state, openAddModal: false, board: newBoard };
+    });
+  },
+  editTask: (columnId, taskId, editDetails) => {
+    set((state) => {
+      const newBoard = structuredClone(state.board);
+      newBoard.tasks[taskId] = { ...newBoard.tasks[taskId], ...editDetails };
+
+      return { ...state, openAddModal: false, board: newBoard };
     });
   },
 }));
