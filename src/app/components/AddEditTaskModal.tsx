@@ -32,8 +32,8 @@ interface AddTaskModalProps {
 
 const formSchema = z.object({
   title: z.string().min(1, { message: "Title is a required." }).max(50),
-  description: z.string().max(50),
-  branchName: z.string().max(50),
+  description: z.string().max(150),
+  branchName: z.string().max(150),
 });
 
 const AddEditTaskModal = ({

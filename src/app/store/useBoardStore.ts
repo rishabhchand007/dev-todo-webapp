@@ -7,86 +7,15 @@ import {
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import { create } from "zustand";
-import { uuidv4 } from "../utilities";
-
-const initialDataLoad: BoardState = {
-  columns: {
-    column1: {
-      id: "column1",
-      title: "TODO",
-      taskIds: ["task1", "task2"],
-      itemCount: 2,
-    },
-    column2: {
-      id: "column2",
-      title: "IN WORK",
-      taskIds: ["task3", "task4"],
-      itemCount: 2,
-    },
-    column3: {
-      id: "column3",
-      title: "COMPLETED",
-      taskIds: ["task5", "task6", "task7"],
-      itemCount: 3,
-    },
-  },
-  tasks: {
-    task1: {
-      id: "task1",
-      columnId: "column1",
-      title: "1 Copywriting of the app",
-      description:
-        "Composing words to provide people with decision-making clarity.",
-      branchName: "copy-write-app",
-    },
-    task2: {
-      id: "task2",
-      columnId: "column1",
-      title: "2 Add new dropdown in the forms",
-      description: "Add, delete, remove and update options.",
-      branchName: "feat-dropdown",
-    },
-    task3: {
-      id: "task3",
-      columnId: "column2",
-      title: "3 Github Integration",
-      description: "Processing in the backend",
-    },
-    task4: {
-      id: "task4",
-      columnId: "column2",
-      title: "4 Remove Admin Panel Colors",
-      description: "",
-    },
-    task5: {
-      id: "task5",
-      columnId: "column3",
-      title: "4 Remove Admin Panel Colors",
-      description: "4 Remove Admin Panel Colors",
-      branchName: "copy-write-app",
-    },
-    task6: {
-      id: "task6",
-      columnId: "column3",
-      title: "4 Remove Admin Panel Colors",
-      description: "4 Remove Admin Panel Colors",
-      branchName: "copy-write-app",
-    },
-    task7: {
-      id: "task7",
-      columnId: "column3",
-      title: "4 Remove Admin Panel Colors",
-      description: "4 Remove Admin Panel Colors",
-      branchName: "copy-write-app",
-    },
-  },
-};
+import { initialData, saveBoardDataLocally, uuidv4 } from "../utilities";
 
 interface BoardStore {
   openAddModal: boolean | string;
   board: BoardState;
   activeId: UniqueIdentifier | null;
   taskEditData: undefined | Task;
+  openDeleteModal: boolean;
+  deleteData: Task | undefined;
   setOpenAddModal: (columnID: boolean | string) => void;
   handleDragStart: (event: DragStartEvent) => void;
   handleDragOver: (event: DragOverEvent) => void;
@@ -94,13 +23,22 @@ interface BoardStore {
   setTaskEditData: (taskEditData: Task | undefined) => void;
   addNewTask: (columnId: string, addDetails: TaskState) => void;
   editTask: (columnId: string, taskId: string, editDetails: TaskState) => void;
+  setOpenDeleteModel: (bool: boolean) => void;
+  setDeleteData: (deleteData: Task | undefined) => void;
+  deleteTask: (deleteData: Task) => void;
 }
+const loadBoardState = (): BoardState => {
+  const storedBoard = localStorage.getItem("boardState");
+  return storedBoard ? JSON.parse(storedBoard) : initialData;
+};
 
 export const useBoardStore = create<BoardStore>((set) => ({
   openAddModal: false,
-  board: initialDataLoad,
+  board: loadBoardState(),
   activeId: null,
   taskEditData: undefined,
+  openDeleteModal: false,
+  deleteData: undefined,
   setTaskEditData: (taskEditData) => {
     set({ taskEditData });
   },
@@ -181,7 +119,7 @@ export const useBoardStore = create<BoardStore>((set) => ({
             // Update task's columnId
             activeTask.columnId = overId as string;
           }
-
+          saveBoardDataLocally(newBoard);
           return { ...state, board: newBoard };
         }),
       0
@@ -222,6 +160,7 @@ export const useBoardStore = create<BoardStore>((set) => ({
 
         // Convert back to an object
         newBoard.columns = Object.fromEntries(reorderedEntries);
+        saveBoardDataLocally(newBoard);
         return { ...state, board: newBoard };
       }
       return state;
@@ -242,6 +181,7 @@ export const useBoardStore = create<BoardStore>((set) => ({
       const newTaskIds = [...newBoard?.columns[columnId]?.taskIds];
       newTaskIds.unshift(newTaskId);
       newBoard.columns[columnId].taskIds = newTaskIds;
+      saveBoardDataLocally(newBoard);
       return { ...state, openAddModal: false, board: newBoard };
     });
   },
@@ -249,8 +189,25 @@ export const useBoardStore = create<BoardStore>((set) => ({
     set((state) => {
       const newBoard = structuredClone(state.board);
       newBoard.tasks[taskId] = { ...newBoard.tasks[taskId], ...editDetails };
-
+      saveBoardDataLocally(newBoard);
       return { ...state, openAddModal: false, board: newBoard };
+    });
+  },
+  setOpenDeleteModel: (bool) => {
+    set({ openDeleteModal: bool });
+  },
+  setDeleteData: (deleteData) => {
+    set({ deleteData });
+  },
+  deleteTask: (deleteData) => {
+    set((state) => {
+      const newBoard = structuredClone(state.board);
+      delete newBoard.tasks[deleteData.id];
+      newBoard.columns[deleteData.columnId].taskIds = newBoard.columns[
+        deleteData.columnId
+      ].taskIds.filter((id) => id !== deleteData.id);
+      saveBoardDataLocally(newBoard);
+      return { ...state, openDeleteModal: false, board: newBoard };
     });
   },
 }));

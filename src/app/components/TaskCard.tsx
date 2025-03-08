@@ -17,7 +17,13 @@ interface TaskCardProps {
 
 const TaskCard = React.memo(
   ({ id, columnId, title, description, branchName }: TaskCardProps) => {
-    const { setTaskEditData, setOpenAddModal } = useBoardStore();
+    const setTaskEditData = useBoardStore((state) => state.setTaskEditData);
+    const setOpenAddModal = useBoardStore((state) => state.setOpenAddModal);
+    const setOpenDeleteModel = useBoardStore(
+      (state) => state.setOpenDeleteModel
+    );
+    const setDeleteData = useBoardStore((state) => state.setDeleteData);
+
     return (
       <Card className="p-[16px] bg-todoCardBackground hover:border-textWhite group">
         <div className="flex justify-between items-start relative ">
@@ -40,7 +46,14 @@ const TaskCard = React.memo(
             >
               <EditIcon />
             </div>
-            <DeleteIcon />
+            <div
+              onClick={() => {
+                setOpenDeleteModel(true);
+                setDeleteData({ id, columnId, title, description, branchName });
+              }}
+            >
+              <DeleteIcon />
+            </div>
           </div>
         </div>
         {description && (

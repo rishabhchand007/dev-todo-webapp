@@ -38,7 +38,7 @@ const BoardColumn = ({ column, tasks, openAddTaskModel }: BoardColumnProps) => {
         transform: CSS.Translate.toString(transform),
         opacity: isDragging ? 0.5 : undefined,
       }}
-      className="w-[282px] backdrop-blur-sm p-3 rounded-lg bg-white/[.01] min-h-56 h-[calc(100dvh-9rem)]  "
+      className="w-[282px] backdrop-blur-sm p-3 rounded-lg bg-white/[.01] min-h-56   "
       {...listeners}
     >
       <div className="flex border-b-2 border-[#1E293B] pb-3 px-3 mb-6 justify-between items-center">
@@ -56,7 +56,7 @@ const BoardColumn = ({ column, tasks, openAddTaskModel }: BoardColumnProps) => {
         </div>
       </div>
 
-      <div className="flex  flex-col gap-y-4">
+      <div className="flex  flex-col gap-y-4 overflow-auto h-[calc(100dvh-14rem)]">
         <SortableContext items={memoizedTaskIds}>
           {column?.taskIds?.map((item) => (
             <SortableTask

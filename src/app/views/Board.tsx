@@ -1,6 +1,5 @@
 "use client";
 import {
-  closestCorners,
   DndContext,
   DragOverlay,
   KeyboardSensor,
@@ -22,12 +21,14 @@ import TaskCard from "../components/TaskCard";
 import { createPortal } from "react-dom";
 import { useBoardStore } from "../store/useBoardStore";
 import AddEditTaskModal from "../components/AddEditTaskModal";
+import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 
 const Board = () => {
   const {
-    addNewTask,
     board,
     activeId,
+    openDeleteModal,
+    deleteData,
     handleDragStart,
     handleDragOver,
     handleDragEnd,
@@ -35,6 +36,8 @@ const Board = () => {
     setOpenAddModal,
     taskEditData,
     setTaskEditData,
+    setOpenDeleteModel,
+    setDeleteData,
   } = useBoardStore();
 
   const memorizedColumnIds = useMemo(
@@ -102,6 +105,16 @@ const Board = () => {
             setTaskEditData(undefined);
           }}
           taskEditData={taskEditData}
+        />
+      )}
+      {openDeleteModal && (
+        <DeleteConfirmationModal
+          open={openDeleteModal}
+          onClose={() => {
+            setOpenDeleteModel(false);
+            setDeleteData(undefined);
+          }}
+          deleteData={deleteData}
         />
       )}
     </>
