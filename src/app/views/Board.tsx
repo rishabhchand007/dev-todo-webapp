@@ -77,15 +77,19 @@ const Board = () => {
           {"document" in window &&
             createPortal(
               <DragOverlay adjustScale={false} dropAnimation={dropAnimation}>
-                {activeId && activeId.toString().includes("task") && (
-                  <TaskCard
-                    id={activeId.toString()}
-                    columnId={board.tasks[activeId].columnId}
-                    title={board.tasks[activeId].title}
-                    description={board.tasks[activeId].description}
-                    branchName={board.tasks[activeId].branchName}
-                  />
-                )}
+                {activeId &&
+                  activeId.toString().includes("task") &&
+                  board.tasks[activeId] && (
+                    <>
+                      <TaskCard
+                        id={activeId.toString()}
+                        columnId={board.tasks[activeId].columnId}
+                        title={board.tasks[activeId].title}
+                        description={board.tasks[activeId].description}
+                        branchName={board.tasks[activeId].branchName}
+                      />
+                    </>
+                  )}
                 {activeId && activeId.toString().includes("column") && (
                   <BoardColumn
                     column={board.columns[activeId]}
