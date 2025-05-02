@@ -6,7 +6,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import BoardColumn from "../components/BoardColumn";
 import {
   SortableContext,
@@ -53,6 +53,13 @@ const Board = () => {
     })
   );
 
+  // Add this state to track client-side mounting
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   return (
     <>
       <div className="px-12 py-7 flex gap-[30px]">
@@ -74,7 +81,8 @@ const Board = () => {
             ))}
           </SortableContext>
 
-          {"document" in window &&
+          {isMounted &&
+            "document" in window &&
             createPortal(
               <DragOverlay adjustScale={false} dropAnimation={dropAnimation}>
                 {activeId &&
@@ -87,6 +95,7 @@ const Board = () => {
                         title={board.tasks[activeId].title}
                         description={board.tasks[activeId].description}
                         branchName={board.tasks[activeId].branchName}
+                        priority={board.tasks[activeId].priority}
                       />
                     </>
                   )}
@@ -101,7 +110,7 @@ const Board = () => {
             )}
         </DndContext>
       </div>
-      {openAddModal && (
+      {isMounted && openAddModal && (
         <AddEditTaskModal
           open={openAddModal}
           onClose={() => {

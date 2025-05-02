@@ -1,3 +1,4 @@
+"use client";
 import { BoardState, Task, TaskState } from "@/common/types";
 import {
   DragEndEvent,
@@ -27,14 +28,15 @@ interface BoardStore {
   setDeleteData: (deleteData: Task | undefined) => void;
   deleteTask: (deleteData: Task) => void;
 }
-const loadBoardState = (): BoardState => {
-  const storedBoard = localStorage.getItem("boardState");
-  return storedBoard ? JSON.parse(storedBoard) : initialData;
+const loadBoardState = () => {
+  if (typeof window === "undefined") return initialData;
+  const stored = localStorage.getItem("boardState");
+  return stored ? JSON.parse(stored) : initialData;
 };
 
 export const useBoardStore = create<BoardStore>((set) => ({
   openAddModal: false,
-  board: loadBoardState(),
+  board: initialData,
   activeId: null,
   taskEditData: undefined,
   openDeleteModal: false,
@@ -174,6 +176,7 @@ export const useBoardStore = create<BoardStore>((set) => ({
       title: addDetails.title,
       description: addDetails.description,
       branchName: addDetails.branchName,
+      priority: addDetails.priority,
     };
     set((state) => {
       const newBoard = structuredClone(state.board);
@@ -211,3 +214,8 @@ export const useBoardStore = create<BoardStore>((set) => ({
     });
   },
 }));
+
+if (typeof window !== "undefined") {
+  const hydratedBoard = loadBoardState();
+  useBoardStore.setState({ board: hydratedBoard });
+}

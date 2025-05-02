@@ -66,6 +66,7 @@ const BoardColumn = ({ column, tasks, openAddTaskModel }: BoardColumnProps) => {
               description={tasks[item].description}
               branchName={tasks[item].branchName}
               columnId={tasks[item].columnId}
+              priority={tasks[item].priority}
             />
           ))}
         </SortableContext>

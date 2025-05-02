@@ -11,12 +11,14 @@ export interface Task {
   title: string;
   description: string;
   branchName?: string;
+  priority: string;
 }
 
 export interface TaskState {
   title: string;
   description: string;
   branchName?: string;
+  priority: string;
 }
 export interface BoardState {
   columns: Record<string, Column>;

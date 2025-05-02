@@ -16,6 +16,9 @@ const config: Config = {
         textGrey: "#B8B8B8",
         borderGrey: "#292929",
         todoCardBackground: "#1D1F21",
+        highPriorityColor: "#EF4444",
+        mediumPriorityColor: "#10B981",
+        lowPriorityColor: "#42A5F5",
         background: "black",
         foreground: "hsl(var(--foreground))",
         card: {

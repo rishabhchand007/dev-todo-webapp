@@ -38,6 +38,7 @@ export const initialData: BoardState = {
       description:
         "Composing words to provide people with decision-making clarity.",
       branchName: "copy-write-app",
+      priority: "medium",
     },
     task2: {
       id: "task2",
@@ -45,18 +46,21 @@ export const initialData: BoardState = {
       title: "2 Add new dropdown in the forms",
       description: "Add, delete, remove and update options.",
       branchName: "feat-dropdown",
+      priority: "high",
     },
     task3: {
       id: "task3",
       columnId: "column2",
       title: "3 Github Integration",
       description: "Processing in the backend",
+      priority: "medium",
     },
     task4: {
       id: "task4",
       columnId: "column2",
       title: "4 Remove Admin Panel Colors",
       description: "",
+      priority: "low",
     },
     task5: {
       id: "task5",
@@ -64,6 +68,7 @@ export const initialData: BoardState = {
       title: "4 Remove Admin Panel Colors",
       description: "4 Remove Admin Panel Colors",
       branchName: "copy-write-app",
+      priority: "medium",
     },
     task6: {
       id: "task6",
@@ -71,6 +76,7 @@ export const initialData: BoardState = {
       title: "4 Remove Admin Panel Colors",
       description: "4 Remove Admin Panel Colors",
       branchName: "copy-write-app",
+      priority: "low",
     },
     task7: {
       id: "task7",
@@ -78,6 +84,7 @@ export const initialData: BoardState = {
       title: "4 Remove Admin Panel Colors",
       description: "4 Remove Admin Panel Colors",
       branchName: "copy-write-app",
+      priority: "high",
     },
   },
 };

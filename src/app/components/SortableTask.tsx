@@ -10,6 +10,7 @@ const SortableTask = ({
   title,
   description,
   branchName,
+  priority,
 }: Task) => {
   const {
     attributes,
@@ -41,6 +42,7 @@ const SortableTask = ({
         title={title}
         description={description}
         branchName={branchName}
+        priority={priority}
       />
     </div>
   );

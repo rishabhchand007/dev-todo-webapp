@@ -6,9 +6,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { GitBranchIcon } from "../icons";
+import {
+  GitBranchIcon,
+  HighPriorityIcon,
+  LowPriorityIcon,
+  MediumPriorityIcon,
+} from "../icons";
 import { Button } from "@/components/ui/button";
 import { Task, TaskState } from "@/common/types";
 import { z } from "zod";
@@ -31,9 +45,10 @@ interface AddTaskModalProps {
 }
 
 const formSchema = z.object({
-  title: z.string().min(1, { message: "Title is a required." }).max(50),
+  title: z.string().min(1, { message: "Title is required." }).max(50),
   description: z.string().max(150),
   branchName: z.string().max(150),
+  priority: z.string().min(1, { message: "Priority is required." }).max(50),
 });
 
 const AddEditTaskModal = ({
@@ -48,6 +63,7 @@ const AddEditTaskModal = ({
           title: taskEditData?.title,
           description: taskEditData?.description,
           branchName: taskEditData?.branchName,
+          priority: taskEditData?.priority || "medium",
         }
       : {
           title: "",
@@ -60,7 +76,9 @@ const AddEditTaskModal = ({
   return (
     <>
       <Dialog open={Boolean(open)} onOpenChange={onClose}>
-        <DialogContent>
+        <DialogContent
+          onOpenAutoFocus={(e) => taskEditData && e.preventDefault()}
+        >
           <DialogHeader>
             <DialogTitle>
               {taskEditData?.id ? "Edit Task" : "Add New Task"}
@@ -71,11 +89,12 @@ const AddEditTaskModal = ({
           </DialogHeader>
           <Form {...form}>
             <form
-              onSubmit={form.handleSubmit((formData) =>
+              onSubmit={form.handleSubmit((formData) => {
+                console.log(formData, "formData");
                 taskEditData?.id
                   ? editTask(taskEditData.columnId, taskEditData.id, formData)
-                  : addNewTask(String(open), formData)
-              )}
+                  : addNewTask(String(open), formData);
+              })}
               className="space-y-4"
             >
               <FormField
@@ -106,6 +125,45 @@ const AddEditTaskModal = ({
                     {/* <FormDescription>
                       This is your public display name.
                     </FormDescription> */}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="priority"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className=" flex items-center gap-1">
+                      Priority
+                    </FormLabel>
+
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="">
+                          <SelectValue placeholder="Select Priority Level" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectItem value="high">
+                            <HighPriorityIcon />
+                            High
+                          </SelectItem>
+                          <SelectItem value="medium">
+                            <MediumPriorityIcon /> Medium
+                          </SelectItem>
+                          <SelectItem value="low">
+                            <LowPriorityIcon />
+                            Low
+                          </SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+
                     <FormMessage />
                   </FormItem>
                 )}

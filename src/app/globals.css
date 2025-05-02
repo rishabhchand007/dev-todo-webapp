@@ -131,8 +131,6 @@ body {
   }
 }
 
-
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -140,4 +138,8 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.clip-path-triangle {
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
 }

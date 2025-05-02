@@ -92,3 +92,21 @@ export const GitBranchIcon = () => (
     />
   </svg>
 );
+
+export const HighPriorityIcon = () => (
+  <div
+    className="bg-highPriorityColor w-[9px]  h-[9px] shrink-0 inline-block mt-1 me-1.5 
+       rounded-[2px]"
+  />
+);
+
+export const MediumPriorityIcon = () => (
+  <div className="bg-mediumPriorityColor w-[9px] h-[9px]  shrink-0 inline-block mt-1 me-1.5  rounded-[2px] " />
+);
+
+export const LowPriorityIcon = () => (
+  <div
+    className="bg-lowPriorityColor w-[9px]   h-[9px]  shrink-0 inline-block mt-1 me-1.5 
+      rounded-[2px]"
+  />
+);

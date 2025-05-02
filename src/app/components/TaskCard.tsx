@@ -1,9 +1,14 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { CopyIcon, DeleteIcon, EditIcon, GitBranchIcon } from "../icons";
-import { Task } from "@/common/types";
+import {
+  CopyIcon,
+  DeleteIcon,
+  EditIcon,
+  GitBranchIcon,
+  HighPriorityIcon,
+  LowPriorityIcon,
+  MediumPriorityIcon,
+} from "../icons";
 import { useBoardStore } from "../store/useBoardStore";
 
 interface TaskCardProps {
@@ -13,21 +18,38 @@ interface TaskCardProps {
   description: string;
   branchName?: string;
   order?: number;
+  priority: string;
 }
 
 const TaskCard = React.memo(
-  ({ id, columnId, title, description, branchName }: TaskCardProps) => {
+  ({
+    id,
+    columnId,
+    title,
+    description,
+    branchName,
+    priority,
+  }: TaskCardProps) => {
     const setTaskEditData = useBoardStore((state) => state.setTaskEditData);
     const setOpenAddModal = useBoardStore((state) => state.setOpenAddModal);
     const setOpenDeleteModel = useBoardStore(
       (state) => state.setOpenDeleteModel
     );
     const setDeleteData = useBoardStore((state) => state.setDeleteData);
-
     return (
       <Card className="p-[16px] bg-todoCardBackground hover:border-textWhite group">
-        <div className="flex justify-between items-start relative ">
-          <div className="text-[14px] font-[700]">{title}</div>
+        <div className="flex justify-between items-start relative gap-1">
+          <div>
+            {priority === "low" ? (
+              <LowPriorityIcon />
+            ) : priority === "high" ? (
+              <HighPriorityIcon />
+            ) : (
+              <MediumPriorityIcon />
+            )}
+
+            <span className="text-[14px] font-[700]">{title}</span>
+          </div>
           <div
             className="flex gap-[6px] pt-1 absolute right-0 bg-todoCardBackground ps-1 hidden group-hover:flex"
             data-no-dnd
@@ -40,6 +62,7 @@ const TaskCard = React.memo(
                   title,
                   description,
                   branchName,
+                  priority,
                 });
                 setOpenAddModal(columnId);
               }}
@@ -49,13 +72,21 @@ const TaskCard = React.memo(
             <div
               onClick={() => {
                 setOpenDeleteModel(true);
-                setDeleteData({ id, columnId, title, description, branchName });
+                setDeleteData({
+                  id,
+                  columnId,
+                  title,
+                  description,
+                  branchName,
+                  priority,
+                });
               }}
             >
               <DeleteIcon />
             </div>
           </div>
         </div>
+
         {description && (
           <div className="text-[12px] text-textGrey pt-3">{description}</div>
         )}
